@@ -31,8 +31,8 @@ namespace CFB_Predictor
         public const double MIN_MOVEMENT    = 0.01;    // min average movement by the swarm
         public const double MAX_MOVEMENT    = 0.0;      // max movement for the neural network. Set to 0 to ignore
 
-        public const int N_PARTICLES        = 100;      // number of swarm particles
-        public const int ITERATIONS         = 300;     // number of swarm steps
+        public const int N_PARTICLES        = 500;      // number of swarm particles
+        public const int ITERATIONS         = 5000;     // number of swarm steps
 
         public const double MOMENTUM        = 0.9;      // MOMENTUM of a particle
         public const double MAX_GLOBAL      = 0.2;      // MOMENTUM towards global best
@@ -43,16 +43,16 @@ namespace CFB_Predictor
         public const int TRAIN_TYPE         = RAND;     // chooses whether to train using home, visitor, or random
 
         public const int RUN                = SIM_DATES;    // TRAIN | DUMB_ACC | SIM_DATES
-        public const string SAVE_TO         = "Network_1.csv";
+        public const string SAVE_TO         = "Network_3.csv";
 
         public const int BEGIN_NETWORKS     = 1;        // starting number of 1st network to read in
-        public const int END_NETWORKS       = 1;        // starting number of last network to read in
+        public const int END_NETWORKS       = 3;        // starting number of last network to read in
 
-        public const int PREDICTION_TYPE    = PTS_AVG;      // DIF | SIM_AVG | PTS_AVG
-        public const int N_SIM_GAMES        = 100;       // games to find similarities with when finding a network error
+        public const int PREDICTION_TYPE    = SIM_AVG;      // DIF | SIM_AVG | PTS_AVG
+        public const int N_SIM_GAMES        = 50;       // games to find similarities with when finding a network error
 
-        public readonly static int[] ACCRY_DATES = { WEEKS_2013[6][0], WEEKS_2013[15][1] };
-        public readonly static int[] TRAIN_DATES = { WEEKS_2013[0][0], WEEKS_2013[5][1] };
+        public readonly static int[] ACCRY_DATES = { WEEKS_2013[4][0], WEEKS_2013[15][1] };
+        public readonly static int[] TRAIN_DATES = { WEEKS_2013[0][0], WEEKS_2013[3][1] };
         public readonly static int[] ALL_DATES = { 0, int.MaxValue };
 
         public const double CORRECT_FACTOR  = 1.0;       // factor for which a network's error is changed if the game is correct
@@ -92,57 +92,57 @@ namespace CFB_Predictor
                                 ADJ_PASS_AVG,       ADJ_PASS_AVG,
                                 ADJ_RUSH_AVG,       ADJ_RUSH_AVG,
                                 POINTS,             POINTS,
-                                //YARD_RATIO,         YARD_RATIO,
+                                YARD_RATIO,         YARD_RATIO,
                                 IS_HOME, 
                                 HV_PY_EXPECT,       HV_PY_EXPECT,
-                                //HOME_TIMES_HVPE,
+                                HOME_TIMES_HVPE,
                                 OOC_PYTHAG,         OOC_PYTHAG,
-                                //OOC_PYTHANG_RATIO,
+                                OOC_PYTHANG_RATIO,
                                 PYTHANG_EXPECT,     PYTHANG_EXPECT,
-                                //PENALTY,            PENALTY,
-                                //TO_NET,             TO_NET,
-                                //TO_FOR,             TO_FOR,
-                                //TO_AGAINST,         TO_AGAINST,
-                                //TIME_OF_POS,
+                                PENALTY,            PENALTY,
+                                TO_NET,             TO_NET,
+                                TO_FOR,             TO_FOR,
+                                TO_AGAINST,         TO_AGAINST,
+                                TIME_OF_POS,
                               };
             bool[] inUseOpponent = {
                                      false, true,     // TOTAL_YARDS
                                      false, true,     // ADJ_PASS_AVG
                                      false, true,     // ADJ_RUSH_AVG
                                      false, true,     // POINTS
-                                     //false, true,     // YARD_RATIO
+                                     false, true,     // YARD_RATIO
                                      false,           // IS_HOME
                                      false, true,     // HV_PY_EXPECT
-                                     //false,           // HOME_TIMES_HVPE
+                                     false,           // HOME_TIMES_HVPE
                                      false, true,     // OOC_PYTHAG
-                                     //false,           // OOC_PYTHANG_RATIO
+                                     false,           // OOC_PYTHANG_RATIO
                                      false, true,     // PYTHANG_EXPECT
-                                     //false, true,     // PENALTY
-                                     //false, true,     // TO_NET
-                                     //false, true,     // TO_FOR
-                                     //false, true,     // TO_AGAINST
-                                     //false,           // TIME_OF_POS
+                                     false, true,     // PENALTY
+                                     false, true,     // TO_NET
+                                     false, true,     // TO_FOR
+                                     false, true,     // TO_AGAINST
+                                     false,           // TIME_OF_POS
                                    };
             bool[] inUseOffense = {
                                     true, false,      // TOTAL_YARDS
                                     true, false,      // ADJ_PASS_AVG
                                     true, false,      // ADJ_RUSH_AVG
                                     true, false,      // POINTS
-                                    //true, false,      // YARD_RATIO
+                                    true, false,      // YARD_RATIO
                                     true,             // IS_HOME
                                     true, true,       // HV_PY_EXPECT
-                                    //true,             // HOME_TIMES_HVPE
+                                    true,             // HOME_TIMES_HVPE
                                     true, true,       // OOC_PYTHAG
-                                    //true,             // OOC_PYTHANG_RATIO
+                                    true,             // OOC_PYTHANG_RATIO
                                     true, true,       // PYTHANG_EXPECT
-                                    //true, true,       // PENALTY
-                                    //true, true,       // TO_NET
-                                    //true, true,       // TO_FOR
-                                    //true, true,       // TO_AGAINST
-                                    //true,             // TIME_OF_POS
+                                    true, true,       // PENALTY
+                                    true, true,       // TO_NET
+                                    true, true,       // TO_FOR
+                                    true, true,       // TO_AGAINST
+                                    true,             // TIME_OF_POS
                                   };
 
-            int[] LayerSizes = { inputStat.Length, 8, 4, 2, 1 };   // 1st layer is # of inputs, last is # of outputs
+            int[] LayerSizes = { inputStat.Length, 22, 12, 6, 3, 1 };   // 1st layer is # of inputs, last is # of outputs
 
             int[] outputStat = { POINTS };
 
@@ -198,9 +198,6 @@ namespace CFB_Predictor
 
             else if (RUN == SIM_DATES)
             {
-                // Get training maximums
-                double[] maximumData = FindMaximums(accSeason.Games);
-
                 // Read in networks
                 List<Neural_Network> networkList = new List<Neural_Network>();
                 for (int i = BEGIN_NETWORKS; i <= END_NETWORKS; i++)
@@ -214,7 +211,7 @@ namespace CFB_Predictor
 
                 // Get accuracy
                 int[] dates = ACCRY_DATES;
-                correct = SimulateWeek(accSeason, dates, networks, maximumData, ref predictions, ref nGames, trainGames);
+                correct = SimulateWeek(accSeason, dates, networks, ref predictions, ref nGames, trainGames);
             }
 
             double pctCorrect = 100 * correct / nGames;

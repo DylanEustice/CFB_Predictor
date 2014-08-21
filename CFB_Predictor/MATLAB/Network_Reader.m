@@ -1,7 +1,7 @@
 % Read in network
 clear;clc;
 path = '../Networks/';
-file = 'Network_1.csv';
+file = 'Network_2.csv';
 data = xlsread([path  file]);
 
 % Get layer sizes from top line

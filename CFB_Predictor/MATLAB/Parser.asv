@@ -98,7 +98,6 @@ for i = 1:1%algInfo.outputs
 end
 
 %% Winner Accuracy
-path = '../Output/';
 file = 'Point_Predictions.csv';
 ptPredictions = xlsread([path  file]);
 ptPredictions(any(isnan(ptPredictions),2),:) = [];
@@ -107,18 +106,13 @@ simulatedPts = ptPredictions(:,1:2);
 actualPts = ptPredictions(:,3:4);
 
 [homePts homeIdx] = sort(ptPredictions(:,1));
-[visitorPts visitorIdx] = sort(ptPredictions(:,2));
+[visitorIdx visitorPts] = sort(ptPredictions(:,2));
 realHome = ptPredictions(:,3);
 realVisitor = ptPredictions(:,4);
 
 figure;
 subplot(1,2,1); scatter(1:length(homePts), homePts); hold on;
 subplot(1,2,1); scatter(1:length(homePts), realHome(homeIdx));
-subplot(1,2,2); scatter(1:length(visitorPts), visitorPts); hold on;
-subplot(1,2,2); scatter(1:length(visitorPts), realVisitor(visitorIdx));
-
-fprintf('Home bias:    %0.2f\n', sum(homePts - realHome(homeIdx))/length(homePts));
-fprintf('Visitor bias: %0.2f\n\n', sum(visitorPts - realVisitor(visitorIdx))/length(visitorPts));
 
 % Get gross accuracy
 simHomeWin = min(simulatedPts(:,1)>simulatedPts(:,2),1);

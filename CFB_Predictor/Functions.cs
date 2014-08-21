@@ -595,8 +595,8 @@ namespace CFB_Predictor
 
         //
         // Tries to predict a week. Uses only past game knowledge.
-        public static double SimulateWeek(Season season, int[] dates, Neural_Network[] networks, double[] maximumData,
-            ref string[] predictions, ref int nGames, Game[] similarGames)
+        public static double SimulateWeek(Season season, int[] dates, Neural_Network[] networks, ref string[] predictions, 
+            ref int nGames, Game[] similarGames)
         {
             Console.WriteLine("Finding accuracy of network(s): ");
             Console.WriteLine("          Start date: {0}", dates[0]);
@@ -607,6 +607,9 @@ namespace CFB_Predictor
             // Get games
             Game[] Games = GetGoodGames(season, dates);
             nGames = Games.Length;
+
+            // Get training maximums
+            double[] maximumData = FindMaximums(Games);
 
             // Find accuracy of each game
             for (int i = 0; i < Games.Length; i++)

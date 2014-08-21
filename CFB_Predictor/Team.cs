@@ -192,7 +192,7 @@ namespace CFB_Predictor
                     else
                         tot += AddOppStat(g, stat);
                 }
-                return (tot - gameStat) / nGames;
+                return tot / nGames;
             }
             else
             {

@@ -28,7 +28,7 @@ namespace CFB_Predictor
             {
                 for (int i = 0; i < n.Weights.Length; i++)
                 {
-                    double weight = 2 * Program.MAX_WEIGHT * random.NextDouble() - Program.MIN_WEIGHT;
+                    double weight = 2 * Program.MAX_WEIGHT * random.NextDouble() + Program.MIN_WEIGHT;
                     n.Weights[i] = weight;
                 }
             }

@@ -180,16 +180,16 @@ namespace CFB_Predictor
         }
 
         //
-        // Gets the ratio of offensive yards normalized by the defense's average yardage given up
+        // Gets the ratio of offensive yards normalized by the defense's average yardage given up (prior to this game)
         public void GetYardageRatio()
         {
-            // Get offenses for this game
-            double homeYards = HomeData[Program.TOTAL_YARDS];
-            double visitorYards = VisitorData[Program.TOTAL_YARDS];
+            // Get offensive averages
+            double homeYards = HomeTeam.GetAverage(Program.TOTAL_YARDS, true, this);
+            double visitorYards = VisitorTeam.GetAverage(Program.TOTAL_YARDS, true, this);
 
-            // Get defensive averages for other teams
-            double homeDefense = HomeTeam.GetAverage(Program.TOTAL_YARDS, false, visitorYards);
-            double visitorDefense = VisitorTeam.GetAverage(Program.TOTAL_YARDS, false, homeYards);
+            // Get defensive averages
+            double homeDefense = HomeTeam.GetAverage(Program.TOTAL_YARDS, false, this);
+            double visitorDefense = VisitorTeam.GetAverage(Program.TOTAL_YARDS, false, this);
 
             // Set ratios
             HomeData[Program.YARD_RATIO] = homeYards / visitorDefense;
@@ -198,91 +198,83 @@ namespace CFB_Predictor
 
         //
         // Gets the pythagorean expectation of the teams' OOC schedule
-        public void GetPythagoreanOOC()
+        public void GetPythagoreanOOC(int[] dates)
         {
             // Set expectation
-            HomeData[Program.OOC_PYTHAG] = HomeTeam.Conf.GetOOCPythagorean();
-            VisitorData[Program.OOC_PYTHAG] = VisitorTeam.Conf.GetOOCPythagorean();
+            HomeData[Program.OOC_PYTHAG] = HomeTeam.Conf.GetPythagoreanOOC(dates);
+            VisitorData[Program.OOC_PYTHAG] = VisitorTeam.Conf.GetPythagoreanOOC(dates);
 
             // Set ratios
             if (VisitorData[Program.OOC_PYTHAG] > 0)    // set home
-                HomeData[Program.OOC_PYTHANG_RATIO] = HomeData[Program.OOC_PYTHAG] / VisitorData[Program.OOC_PYTHAG];
+                HomeData[Program.OOC_PYTHAG_RATIO] = HomeData[Program.OOC_PYTHAG] / VisitorData[Program.OOC_PYTHAG];
             else
-                HomeData[Program.OOC_PYTHANG_RATIO] = Program.PY_RATIO_CAP;
+                HomeData[Program.OOC_PYTHAG_RATIO] = Program.PY_RATIO_CAP;
             
             if (HomeData[Program.OOC_PYTHAG] > 0)       // set visitor
-                VisitorData[Program.OOC_PYTHANG_RATIO] = VisitorData[Program.OOC_PYTHAG] / HomeData[Program.OOC_PYTHAG];
+                VisitorData[Program.OOC_PYTHAG_RATIO] = VisitorData[Program.OOC_PYTHAG] / HomeData[Program.OOC_PYTHAG];
             else
-                VisitorData[Program.OOC_PYTHANG_RATIO] = Program.PY_RATIO_CAP;
-
-            // Set cap
-            //VisitorData[Program.OOC_PYTHANG_RATIO] = VisitorData[Program.OOC_PYTHANG_RATIO] > Program.PY_RATIO_CAP ? Program.PY_RATIO_CAP : VisitorData[Program.OOC_PYTHANG_RATIO];
-            //HomeData[Program.OOC_PYTHANG_RATIO] = HomeData[Program.OOC_PYTHANG_RATIO] > Program.PY_RATIO_CAP ? Program.PY_RATIO_CAP : HomeData[Program.OOC_PYTHANG_RATIO];
+                VisitorData[Program.OOC_PYTHAG_RATIO] = Program.PY_RATIO_CAP;
         }
 
         //
-        // Gets each teams pythagorean percentage
-        public void GetPythagoreanExpectation()
+        // Gets each teams pythagorean percentage within a date range
+        public void GetPythagoreanExpectation(int[] dates)
         {
             // Home
-            double homeRS = HomeTeam.GetTotal(Program.POINTS, HomeData[Program.POINTS]);
-            double homeRA = HomeTeam.GetTotal(Program.POINTS, false, VisitorData[Program.POINTS]);
-            HomeData[Program.PYTHANG_EXPECT] = Math.Pow(homeRS, 2.37) / (Math.Pow(homeRS, 2.37) + Math.Pow(homeRA, 2.37));
+            double homeRS = HomeTeam.GetTotal(Program.POINTS, true, dates);     // home offense
+            double homeRA = HomeTeam.GetTotal(Program.POINTS, false, dates);    // home defense
+            HomeData[Program.PYTHAG_EXPECT] = Math.Pow(homeRS, 2.37) / (Math.Pow(homeRS, 2.37) + Math.Pow(homeRA, 2.37));
 
             // Visitor
-            double visitorRS = VisitorTeam.GetTotal(Program.POINTS, VisitorData[Program.POINTS]);
-            double visitorRA = VisitorTeam.GetTotal(Program.POINTS, false, HomeData[Program.POINTS]);
-            VisitorData[Program.PYTHANG_EXPECT] = Math.Pow(visitorRS, 2.37) / (Math.Pow(visitorRS, 2.37) + Math.Pow(visitorRA, 2.37));
+            double visitorRS = VisitorTeam.GetTotal(Program.POINTS, true, dates);   // visitor offense
+            double visitorRA = VisitorTeam.GetTotal(Program.POINTS, false, dates);  // visitor defense
+            VisitorData[Program.PYTHAG_EXPECT] = Math.Pow(visitorRS, 2.37) / (Math.Pow(visitorRS, 2.37) + Math.Pow(visitorRA, 2.37));
         }
 
         //
         // Gets the home and visitor pythagorean percentage
-        public void GetHomeVisitorPyEx()
+        public void GetHomeVisitorPyEx(int[] dates)
         {
             double homeRS = 0, homeRA = 0;
             double visitorRS = 0, visitorRA = 0;
 
-            // Home
-            if (HomeTeam.Games.Length > 1)
+            // Find sums of points against and scored (Home)
+            foreach (Game G in HomeTeam.Games)
             {
-                // Find sums of points against and scored
-                foreach (Game G in HomeTeam.Games)
+                // Too early or too late
+                if (G.Date < dates[0] || G.Date >= dates[1])
+                    continue;
+
+                if (G.HomeTeam.TeamCode == HomeTeam.TeamCode && G.GameCode != GameCode)
                 {
-                    if (G.HomeTeam.TeamCode == HomeTeam.TeamCode && G.GameCode != GameCode)
-                    {
-                        homeRS += G.HomeData[Program.POINTS];
-                        homeRA += G.VisitorData[Program.POINTS];
-                    }
+                    homeRS += G.HomeData[Program.POINTS];
+                    homeRA += G.VisitorData[Program.POINTS];
                 }
-                // Do calculation
-                double divisor = Math.Pow(homeRS, 2.37) + Math.Pow(homeRA, 2.37);
-                if (divisor > 0)
-                    HomeData[Program.HV_PY_EXPECT] = Math.Pow(homeRS, 2.37) / divisor;
-                else
-                    HomeData[Program.HV_PY_EXPECT] = 0.5;
             }
+            // Do calculation
+            double divisor = Math.Pow(homeRS, 2.37) + Math.Pow(homeRA, 2.37);
+            if (divisor > 0)
+                HomeData[Program.HV_PY_EXPECT] = Math.Pow(homeRS, 2.37) / divisor;
             else
                 HomeData[Program.HV_PY_EXPECT] = 0.5;
 
-            // Visitor
-            if (VisitorTeam.Games.Length > 1)
+            // Find sums of points against and scored (visitor)
+            foreach (Game G in VisitorTeam.Games)
             {
-                // Find sums of points against and scored
-                foreach (Game G in VisitorTeam.Games)
+                // Too early or too late
+                if (G.Date < dates[0] || G.Date >= dates[1])
+                    continue;
+
+                if (G.VisitorTeam.TeamCode == VisitorTeam.TeamCode && G.GameCode != GameCode)
                 {
-                    if (G.VisitorTeam.TeamCode == VisitorTeam.TeamCode && G.GameCode != GameCode)
-                    {
-                        visitorRS += G.HomeData[Program.POINTS];
-                        visitorRA += G.VisitorData[Program.POINTS];
-                    }
+                    visitorRS += G.HomeData[Program.POINTS];
+                    visitorRA += G.VisitorData[Program.POINTS];
                 }
-                // Do calculation
-                double divisor = Math.Pow(visitorRS, 2.37) + Math.Pow(visitorRA, 2.37);
-                if (divisor > 0)
-                    VisitorData[Program.HV_PY_EXPECT] = Math.Pow(visitorRS, 2.37) / divisor;
-                else
-                    VisitorData[Program.HV_PY_EXPECT] = 0.5;
             }
+            // Do calculation
+            divisor = Math.Pow(visitorRS, 2.37) + Math.Pow(visitorRA, 2.37);
+            if (divisor > 0)
+                VisitorData[Program.HV_PY_EXPECT] = Math.Pow(visitorRS, 2.37) / divisor;
             else
                 VisitorData[Program.HV_PY_EXPECT] = 0.5;
 

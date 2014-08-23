@@ -4,3 +4,9 @@ c:\users\dylan\documents\visual studio 2012\Projects\CFB_Predictor\CFB_Predictor
 c:\users\dylan\documents\visual studio 2012\Projects\CFB_Predictor\CFB_Predictor\bin\Debug\CFB_Predictor.pdb
 c:\users\dylan\documents\visual studio 2012\Projects\CFB_Predictor\CFB_Predictor\obj\Debug\CFB_Predictor.exe
 c:\users\dylan\documents\visual studio 2012\Projects\CFB_Predictor\CFB_Predictor\obj\Debug\CFB_Predictor.pdb
+C:\Users\Dylan\Documents\GitHub\CFB_Predictor\CFB_Predictor\bin\Debug\CFB_Predictor.exe.config
+C:\Users\Dylan\Documents\GitHub\CFB_Predictor\CFB_Predictor\obj\Debug\CFB_Predictor.exe
+C:\Users\Dylan\Documents\GitHub\CFB_Predictor\CFB_Predictor\obj\Debug\CFB_Predictor.pdb
+C:\Users\Dylan\Documents\GitHub\CFB_Predictor\CFB_Predictor\bin\Debug\CFB_Predictor.exe
+C:\Users\Dylan\Documents\GitHub\CFB_Predictor\CFB_Predictor\bin\Debug\CFB_Predictor.pdb
+C:\Users\Dylan\Documents\GitHub\CFB_Predictor\CFB_Predictor\obj\Debug\CFB_Predictor.csprojResolveAssemblyReference.cache

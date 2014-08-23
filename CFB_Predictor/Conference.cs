@@ -12,6 +12,7 @@ namespace CFB_Predictor
         public string Name;
         public string Division;
         public Team[] Teams;
+        public List<Season> PastSeasons = new List<Season>();
 
         //
         // Constructor
@@ -37,36 +38,100 @@ namespace CFB_Predictor
         }
 
         //
-        // Gets the Pythagorean expectation for this conference in OOC games
-        public double GetOOCPythagorean()
+        // Adds a list of seasons with only this conference game data
+        public void GetPastSeasons(Season[] pastSeasons)
         {
-            double sumPyE = 0, nGames = 0;
+            foreach (Season S in pastSeasons)
+            {
+                int pastYear = S.Year;  // set the year
+
+                // Find all teams in this conference
+                List<Team> pastTeamsList = new List<Team>();
+                foreach (Team T in S.Teams)
+                    if (T.ConfCode == Code)
+                        pastTeamsList.Add(T);
+
+                // Add all games to the list
+                List<Game> pastGamesList = new List<Game>();
+                foreach (Team T in pastTeamsList)
+                    foreach (Game G in T.Games)
+                        pastGamesList.Add(G);
+
+                Team[] pastTeams = pastTeamsList.ToArray();
+                Game[] pastGames = pastGamesList.ToArray();
+                Season pastSeason = new Season(pastYear, pastTeams, pastGames);
+                PastSeasons.Add(pastSeason);
+            }
+        }
+
+        //
+        // Gets the OOC PE for this conference using only games within a range of games
+        public double GetPythagoreanOOC(int[] dates)
+        {
+            double sumRS = 0, sumRA = 0;
+
+            // Sum games from past seasons
+            foreach (Season S in PastSeasons)
+            {
+                foreach (Team T in S.Teams)
+                {
+                    foreach (Game G in T.Games)
+                    {
+                        // Only get FBS games
+                        if (G.HomeTeam.Conf.Division == "FCS" || G.VisitorTeam.Conf.Division == "FCS")
+                            continue;
+
+                        // Too early or too late
+                        if (G.Date < dates[0] || G.Date >= dates[1])
+                            continue;
+
+                        // Is an OOC game
+                        if (G.HomeTeam.ConfCode != G.VisitorTeam.ConfCode)
+                        {
+                            if (G.HomeTeam.ConfCode == Code)
+                            {
+                                sumRS += G.HomeData[Program.POINTS];
+                                sumRA += G.VisitorData[Program.POINTS];
+                            }
+                            else if (G.VisitorTeam.ConfCode == Code)
+                            {
+                                sumRS += G.VisitorData[Program.POINTS];
+                                sumRA += G.HomeData[Program.POINTS];
+                            }
+                        }
+                    }
+                }
+            }
             foreach (Team T in Teams)
             {
                 foreach (Game G in T.Games)
                 {
+                    // Only get FBS games
+                    if (G.HomeTeam.Conf.Division == "FCS" || G.VisitorTeam.Conf.Division == "FCS")
+                        continue;
+
+                    // Too early or too late
+                    if (G.Date < dates[0] || G.Date >= dates[1])
+                        continue;
+
                     // Is an OOC game
                     if (G.HomeTeam.ConfCode != G.VisitorTeam.ConfCode)
                     {
-                        nGames++;
-                        double RS, RA;
                         if (G.HomeTeam.ConfCode == Code)
                         {
-                            RS = G.HomeData[Program.POINTS];
-                            RA = G.VisitorData[Program.POINTS];
+                            sumRS += G.HomeData[Program.POINTS];
+                            sumRA += G.VisitorData[Program.POINTS];
                         }
-                        else
+                        else if (G.VisitorTeam.ConfCode == Code)
                         {
-                            RS = G.VisitorData[Program.POINTS];
-                            RA = G.HomeData[Program.POINTS];
+                            sumRS += G.VisitorData[Program.POINTS];
+                            sumRA += G.HomeData[Program.POINTS];
                         }
-
-                        sumPyE += Math.Pow(RS, 2.37) / (Math.Pow(RS, 2.37) + Math.Pow(RA, 2.37));
                     }
                 }
             }
 
-            return sumPyE / nGames;
+            return Math.Pow(sumRS, 2.37) / (Math.Pow(sumRS, 2.37) + Math.Pow(sumRA, 2.37));
         }
     }
 }

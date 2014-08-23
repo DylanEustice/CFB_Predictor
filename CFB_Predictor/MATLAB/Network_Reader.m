@@ -1,7 +1,7 @@
 % Read in network
-clear;clc;
+clear;%clc;
 path = '../Networks/';
-file = 'Network_2.csv';
+file = 'Network_1.csv';
 data = xlsread([path  file]);
 
 % Get layer sizes from top line
@@ -24,24 +24,24 @@ for i = 1:length(ann.LayerSizes)-1
     end
 end
 
-step = 0.01;
-outputs = zeros(100, ann.LayerSizes(1)-1); % minus 1 for bias node
+step = 1;
+outputs = zeros(2, ann.LayerSizes(1)-1); % minus 1 for bias node
 for i = 1:ann.LayerSizes(1)-1
     index = 0;
-    for j = step:step:1
+    for j = 0:1
         index = index + 1;
         input = zeros(ann.LayerSizes(1)-1, 1);
         input(i) = j;
         outputs(index,i) = ANN_Think(input, ann);
     end
 end
-plot(outputs);
+% plot(outputs);
 C = regexp(sprintf('%d#', ann.Header), '#', 'split');
 C(end) = [];
-legend(C);
+% legend(C);
 
 % sum differences
 difSum = sum(abs(outputs(end,:)));
 for i = 1:ann.LayerSizes(1)-1
-    fprintf('%s: %f\n', C{i}, 100*outputs(end,i)/difSum);
+    fprintf('%s: %f\n', C{i}, 100*(outputs(end,i) - outputs(1,i))/difSum);
 end

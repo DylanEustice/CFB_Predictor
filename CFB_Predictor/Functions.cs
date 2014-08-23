@@ -11,8 +11,6 @@ namespace CFB_Predictor
 {
     public partial class Program
     {
-        // ---------- BEGIN FUNCTIONS --------------------------------------------------
-
         //
         // Reads in a network saved to file
         public static Neural_Network RememberNetwork(string file)
@@ -156,7 +154,9 @@ namespace CFB_Predictor
             oracle.SaveNetwork(saveFile);               // save network
 
 
-            // ---------- WRITE OUTPUT DATA --------------------------------------------------
+            // ================================================================================
+            //   WRITE OUTPUT DATA  ===========================================================
+            // ================================================================================
 
             // Output parameters
             string outputFileName = "../../Output/AllStats_Output.csv";
@@ -290,16 +290,36 @@ namespace CFB_Predictor
                     if (TRAIN_TYPE == HOME)
                     {
                         if (inUseOpponent[j])   // use this team's or opponent's stats
-                            trainingInputData[trainingCount][j] = trainVisitorTeam.GetAverage(inputStat[j], inUseOffense[j], trainInputGame.VisitorData[inputStat[j]]);
+                        {
+                            int type = inputStat[j];
+                            bool offense = inUseOffense[j];
+                            double gameStat = trainInputGame.VisitorData[inputStat[j]];
+                            trainingInputData[trainingCount][j] = trainVisitorTeam.GetAverage(type, offense, trainInputGame);
+                        }
                         else
-                            trainingInputData[trainingCount][j] = trainHomeTeam.GetAverage(inputStat[j], inUseOffense[j], trainInputGame.HomeData[inputStat[j]]);
+                        {
+                            int type = inputStat[j];
+                            bool offense = inUseOffense[j];
+                            double gameStat = trainInputGame.HomeData[inputStat[j]];
+                            trainingInputData[trainingCount][j] = trainHomeTeam.GetAverage(type, offense, trainInputGame);
+                        }
                     }
                     else if (TRAIN_TYPE == VISITOR)
                     {
                         if (inUseOpponent[j])   // use this team's or opponent's stats
-                            trainingInputData[trainingCount][j] = trainHomeTeam.GetAverage(inputStat[j], inUseOffense[j], trainInputGame.HomeData[inputStat[j]]);
+                        {
+                            int type = inputStat[j];
+                            bool offense = inUseOffense[j];
+                            double gameStat = trainInputGame.HomeData[inputStat[j]];
+                            trainingInputData[trainingCount][j] = trainHomeTeam.GetAverage(type, offense, trainInputGame);
+                        }
                         else
-                            trainingInputData[trainingCount][j] = trainVisitorTeam.GetAverage(inputStat[j], inUseOffense[j], trainInputGame.VisitorData[inputStat[j]]);
+                        {
+                            int type = inputStat[j];
+                            bool offense = inUseOffense[j];
+                            double gameStat = trainInputGame.VisitorData[inputStat[j]];
+                            trainingInputData[trainingCount][j] = trainVisitorTeam.GetAverage(type, offense, trainInputGame);
+                        }
                     }
                     else
                     {
@@ -307,16 +327,36 @@ namespace CFB_Predictor
                         if (trainingCount % 2 == 0)     // use home
                         {
                             if (inUseOpponent[j])   // use this team's or opponent's stats
-                                trainingInputData[trainingCount][j] = trainVisitorTeam.GetAverage(inputStat[j], inUseOffense[j], trainInputGame.VisitorData[inputStat[j]]);
+                            {
+                                int type = inputStat[j];
+                                bool offense = inUseOffense[j];
+                                double gameStat = trainInputGame.VisitorData[inputStat[j]];
+                                trainingInputData[trainingCount][j] = trainVisitorTeam.GetAverage(type, offense, trainInputGame);
+                            }
                             else
-                                trainingInputData[trainingCount][j] = trainHomeTeam.GetAverage(inputStat[j], inUseOffense[j], trainInputGame.HomeData[inputStat[j]]);
+                            {
+                                int type = inputStat[j];
+                                bool offense = inUseOffense[j];
+                                double gameStat = trainInputGame.HomeData[inputStat[j]];
+                                trainingInputData[trainingCount][j] = trainHomeTeam.GetAverage(type, offense, trainInputGame);
+                            }
                         }
                         else                            // use visitor
                         {
                             if (inUseOpponent[j])   // use this team's or opponent's stats
-                                trainingInputData[trainingCount][j] = trainHomeTeam.GetAverage(inputStat[j], inUseOffense[j], trainInputGame.HomeData[inputStat[j]]);
+                            {
+                                int type = inputStat[j];
+                                bool offense = inUseOffense[j];
+                                double gameStat = trainInputGame.HomeData[inputStat[j]];
+                                trainingInputData[trainingCount][j] = trainHomeTeam.GetAverage(type, offense, trainInputGame);
+                            }
                             else
-                                trainingInputData[trainingCount][j] = trainVisitorTeam.GetAverage(inputStat[j], inUseOffense[j], trainInputGame.VisitorData[inputStat[j]]);
+                            {
+                                int type = inputStat[j];
+                                bool offense = inUseOffense[j];
+                                double gameStat = trainInputGame.VisitorData[inputStat[j]];
+                                trainingInputData[trainingCount][j] = trainVisitorTeam.GetAverage(type, offense, trainInputGame);
+                            }
                         }
                     }
                 }
@@ -359,16 +399,36 @@ namespace CFB_Predictor
                             if (TRAIN_TYPE == HOME)
                             {
                                 if (inUseOpponent[k])       // use this team's or opponent's stats
-                                    testInputData[idx][k] = testVisitorTeam.GetAverage(inputStat[k], inUseOffense[k], testInputGame.VisitorData[inputStat[k]]);
+                                {
+                                    int type = inputStat[k];
+                                    bool offense = inUseOffense[k];
+                                    double gameStat = testInputGame.VisitorData[inputStat[k]];
+                                    testInputData[idx][k] = testVisitorTeam.GetAverage(type, offense, testInputGame);
+                                }
                                 else
-                                    testInputData[idx][k] = testHomeTeam.GetAverage(inputStat[k], inUseOffense[k], testInputGame.HomeData[inputStat[k]]);
+                                {
+                                    int type = inputStat[k];
+                                    bool offense = inUseOffense[k];
+                                    double gameStat = testInputGame.HomeData[inputStat[k]];
+                                    testInputData[idx][k] = testHomeTeam.GetAverage(type, offense, testInputGame);
+                                }
                             }
                             else if (TRAIN_TYPE == VISITOR)
                             {
                                 if (inUseOpponent[k])       // use this team's or opponent's stats
-                                    testInputData[idx][k] = testHomeTeam.GetAverage(inputStat[k], inUseOffense[k], testInputGame.HomeData[inputStat[k]]);
+                                {
+                                    int type = inputStat[k];
+                                    bool offense = inUseOffense[k];
+                                    double gameStat = testInputGame.HomeData[inputStat[k]];
+                                    testInputData[idx][k] = testHomeTeam.GetAverage(type, offense, testInputGame);
+                                }
                                 else
-                                    testInputData[idx][k] = testVisitorTeam.GetAverage(inputStat[k], inUseOffense[k], testInputGame.VisitorData[inputStat[k]]);
+                                {
+                                    int type = inputStat[k];
+                                    bool offense = inUseOffense[k];
+                                    double gameStat = testInputGame.VisitorData[inputStat[k]];
+                                    testInputData[idx][k] = testVisitorTeam.GetAverage(type, offense, testInputGame);
+                                }
                             }
                             else
                             {
@@ -376,16 +436,34 @@ namespace CFB_Predictor
                                 if (idx % 2 == 0)           // use home
                                 {
                                     if (inUseOpponent[k])   // use this team's or opponent's stats
-                                        testInputData[idx][k] = testVisitorTeam.GetAverage(inputStat[k], inUseOffense[k], testInputGame.VisitorData[inputStat[k]]);
+                                    {
+                                        int type = inputStat[k];
+                                        bool offense = inUseOffense[k];
+                                        double gameStat = testInputGame.VisitorData[inputStat[k]];
+                                        testInputData[idx][k] = testVisitorTeam.GetAverage(type, offense, testInputGame);
+                                    }
                                     else
-                                        testInputData[idx][k] = testHomeTeam.GetAverage(inputStat[k], inUseOffense[k], testInputGame.HomeData[inputStat[k]]);
+                                    {
+                                        int type = inputStat[k];
+                                        bool offense = inUseOffense[k];
+                                        double gameStat = testInputGame.HomeData[inputStat[k]];
+                                        testInputData[idx][k] = testHomeTeam.GetAverage(type, offense, testInputGame);
+                                    }
                                 }
                                 else                        // use visitor
                                 {
                                     if (inUseOpponent[k])   // use this team's or opponent's stats
-                                        testInputData[idx][k] = testHomeTeam.GetAverage(inputStat[k], inUseOffense[k], testInputGame.HomeData[inputStat[k]]);
+                                    {
+                                        int type = inputStat[k];
+                                        bool offense = inUseOffense[k];
+                                        testInputData[idx][k] = testHomeTeam.GetAverage(type, offense, testInputGame);
+                                    }
                                     else
-                                        testInputData[idx][k] = testVisitorTeam.GetAverage(inputStat[k], inUseOffense[k], testInputGame.VisitorData[inputStat[k]]);
+                                    {
+                                        int type = inputStat[k];
+                                        bool offense = inUseOffense[k];
+                                        testInputData[idx][k] = testVisitorTeam.GetAverage(type, offense, testInputGame);
+                                    }
                                 }
                             }
                         }
@@ -405,10 +483,6 @@ namespace CFB_Predictor
                         }
                     }
                 }
-
-                // Find maximum data point 
-                //FindMaximums(nTrainingGames, nTestGames, trainingCount, testCount, LayerSizes, ref maximumData, trainingInputData,
-                             //trainingOutputData, testInputData, testOutputData);
                 trainingCount++;
                 testCount += ((int)Math.Floor(1 / (1 - TEST_RATIO)) - 1);
             }
@@ -434,8 +508,9 @@ namespace CFB_Predictor
                 for (int j = 0; j < Program.N_DATA_PTS; j++)
                 {
                     // List of stats not approved for normalizing
-                    if (j == Program.YARD_RATIO || j == Program.IS_HOME || j == Program.CONF)
-                        continue;
+                    foreach (int stat in USE_GAME_STAT)
+                        if (j == stat)
+                            continue;
 
                     if (Games[i].HomeData[j] > maximumData[j])
                         maximumData[j] = Games[i].HomeData[j];
@@ -565,7 +640,7 @@ namespace CFB_Predictor
 
                 // Save predictions for each array
                 GetNetworkPredictions(ref homePtsPredictions, ref visitorPtsPredictions, ref networkErrArr, networks,
-                    visitorTeam, homeTeam, maximumData, Games, Games[i], false);
+                    visitorTeam, homeTeam, maximumData, Games, Games[i]);
 
                 // Predict outcome
                 GetFinalPredictions(ref homePtsArr, ref visitorPtsArr, networks, homePtsPredictions, visitorPtsPredictions, networkErrArr);
@@ -640,7 +715,7 @@ namespace CFB_Predictor
 
                 // Save predictions for each array
                 GetNetworkPredictions(ref homePtsPredictions, ref visitorPtsPredictions, ref networkErrArr, networks,
-                    visitorTeam, homeTeam, maximumData, similarGames, Games[i], true);
+                    visitorTeam, homeTeam, maximumData, similarGames, Games[i]);
 
                 // Predict outcome
                 GetFinalPredictions(ref homePtsArr, ref visitorPtsArr, networks, homePtsPredictions, visitorPtsPredictions, networkErrArr);
@@ -652,6 +727,9 @@ namespace CFB_Predictor
                     correct++;
                 else if (homePts < visitorPts && Games[i].VisitorWin)
                     correct++;
+                if (Double.IsNaN(homePts) || Double.IsNaN(visitorPts))
+                    continue;
+
                 predictionsList.Add(homePts.ToString() + "," + visitorPts.ToString() + "," 
                     + Games[i].HomeData[networks[0].OutputStats[0]] + "," + Games[i].VisitorData[networks[0].OutputStats[0]] + ","
                     + Games[i].HomeTeam.TeamName + "," + Games[i].VisitorTeam.TeamName);
@@ -677,7 +755,7 @@ namespace CFB_Predictor
         // Returns an array of predictions for each network
         public static void GetNetworkPredictions(ref double[] homePtsPredictions, ref double[] visitorPtsPredictions, 
             ref double[][] networkErrArr, Neural_Network[] networks, Team vTeam, Team hTeam, double[] maxes, Game[] Games, 
-            Game game, bool toDate)
+            Game game)
         {
             int currNetwork = 0;
             foreach (Neural_Network network in networks)
@@ -692,10 +770,7 @@ namespace CFB_Predictor
                 // Enter inputs
                 double[] inputsHome = new double[network.LayerSizes[0]];
                 double[] inputsVisitor = new double[network.LayerSizes[0]];
-                if (toDate)
-                    GetInputsToDate(ref inputsHome, ref inputsVisitor, network, vTeam, hTeam, maxes, game);
-                else
-                    GetInputs(ref inputsHome, ref inputsVisitor, network, vTeam, hTeam, maxes, game);
+                GetInputs(ref inputsHome, ref inputsVisitor, network, vTeam, hTeam, maxes, game);
 
                 // Make prediction
                 double[] tmpHomePtsArr = new double[1];
@@ -839,8 +914,13 @@ namespace CFB_Predictor
                 if (G.HomeTeam.Conf.Division == "FCS" || G.VisitorTeam.Conf.Division == "FCS")
                     continue;
 
-                // To early or too late
-                if (G.Date < dates[0] || G.Date > dates[1])
+                // Gets rid of teams in the FCS last year (Georgia State)
+                if (G.HomeTeam.PastSeasons.Count > 0 && G.VisitorTeam.PastSeasons.Count > 0)
+                    if (G.HomeTeam.PastSeasons[0].Teams[0].Conf.Division == "FCS" || G.VisitorTeam.PastSeasons[0].Teams[0].Conf.Division == "FCS")
+                        continue;
+
+                // Too early or too late
+                if (G.Date < dates[0] || G.Date >= dates[1])
                     continue;
 
                 // Good to go
@@ -851,7 +931,7 @@ namespace CFB_Predictor
         }
 
         //
-        // Gets input arrays for both teams' stats
+        // Gets input arrays for both teams' stats to a certain date
         public static void GetInputs(ref double[] hInputs, ref double[] vInputs, Neural_Network network, Team vTeam, Team hTeam, double[] maxes, Game game)
         {
             for (int j = 0; j < network.LayerSizes[0]; j++)
@@ -860,36 +940,16 @@ namespace CFB_Predictor
                 if (network.UseOpponent[j])
                 {
                     int inputStat = network.InputStats[j];
-                    hInputs[j] = vTeam.GetAverage(inputStat, network.UseOffense[j], game.VisitorData[inputStat]) / maxes[inputStat];
-                    vInputs[j] = hTeam.GetAverage(inputStat, network.UseOffense[j], game.HomeData[inputStat]) / maxes[inputStat];
+                    bool offense = network.UseOffense[j];
+                    hInputs[j] = vTeam.GetAverage(inputStat, offense, game) / maxes[inputStat];
+                    vInputs[j] = hTeam.GetAverage(inputStat, offense, game) / maxes[inputStat];
                 }
                 else
                 {
                     int inputStat = network.InputStats[j];
-                    hInputs[j] = hTeam.GetAverage(inputStat, network.UseOffense[j], game.HomeData[inputStat]) / maxes[inputStat];
-                    vInputs[j] = vTeam.GetAverage(inputStat, network.UseOffense[j], game.VisitorData[inputStat]) / maxes[inputStat];
-                }
-            }
-        }
-
-        //
-        // Gets input arrays only using stats up to a certain date
-        public static void GetInputsToDate(ref double[] hInputs, ref double[] vInputs, Neural_Network network, Team vTeam, Team hTeam, double[] maxes, Game game)
-        {
-            for (int j = 0; j < network.LayerSizes[0]; j++)
-            {
-                // Opponent stat?
-                if (network.UseOpponent[j])
-                {
-                    int inputStat = network.InputStats[j];
-                    hInputs[j] = vTeam.GetAverage(inputStat, network.UseOffense[j], game.VisitorData[inputStat], game.Date) / maxes[inputStat];
-                    vInputs[j] = hTeam.GetAverage(inputStat, network.UseOffense[j], game.HomeData[inputStat], game.Date) / maxes[inputStat];
-                }
-                else
-                {
-                    int inputStat = network.InputStats[j];
-                    hInputs[j] = hTeam.GetAverage(inputStat, network.UseOffense[j], game.HomeData[inputStat], game.Date) / maxes[inputStat];
-                    vInputs[j] = vTeam.GetAverage(inputStat, network.UseOffense[j], game.VisitorData[inputStat], game.Date) / maxes[inputStat];
+                    bool offense = network.UseOffense[j];
+                    hInputs[j] = hTeam.GetAverage(inputStat, offense, game) / maxes[inputStat];
+                    vInputs[j] = vTeam.GetAverage(inputStat, offense, game) / maxes[inputStat];
                 }
             }
         }
@@ -916,14 +976,16 @@ namespace CFB_Predictor
                     if (network.UseOpponent[j])
                     {
                         int inputStat = network.InputStats[j];
-                        inputsHome[j] = visitorTeam.GetAverage(inputStat, network.UseOffense[j], G.VisitorData[inputStat]) / maximumData[inputStat];
-                        inputsVisitor[j] = homeTeam.GetAverage(inputStat, network.UseOffense[j], G.HomeData[inputStat]) / maximumData[inputStat];
+                        bool offense = network.UseOffense[j];
+                        inputsHome[j] = visitorTeam.GetAverage(inputStat, offense, G) / maximumData[inputStat];
+                        inputsVisitor[j] = homeTeam.GetAverage(inputStat, offense, G) / maximumData[inputStat];
                     }
                     else
                     {
                         int inputStat = network.InputStats[j];
-                        inputsHome[j] = homeTeam.GetAverage(inputStat, network.UseOffense[j], G.HomeData[inputStat]) / maximumData[inputStat];
-                        inputsVisitor[j] = visitorTeam.GetAverage(inputStat, network.UseOffense[j], G.VisitorData[inputStat]) / maximumData[inputStat];
+                        bool offense = network.UseOffense[j];
+                        inputsHome[j] = homeTeam.GetAverage(inputStat, offense, G) / maximumData[inputStat];
+                        inputsVisitor[j] = visitorTeam.GetAverage(inputStat, offense, G) / maximumData[inputStat];
                     }
                 }
 
@@ -993,13 +1055,17 @@ namespace CFB_Predictor
                     // Opponent stat?
                     if (inUseOpponent[j])
                     {
-                        newHomeArr[j] = G.VisitorTeam.GetAverage(inputStat[j], inUseOffense[j], G.VisitorData[inputStat[j]]) / maximumData[inputStat[j]];
-                        newVisitorArr[j] = G.HomeTeam.GetAverage(inputStat[j], inUseOffense[j], G.HomeData[inputStat[j]]) / maximumData[inputStat[j]];
+                        int type = inputStat[j];
+                        bool offense = inUseOffense[j];
+                        newHomeArr[j] = G.VisitorTeam.GetAverage(type, offense, G) / maximumData[inputStat[j]];
+                        newVisitorArr[j] = G.HomeTeam.GetAverage(type, offense, G) / maximumData[inputStat[j]];
                     }
                     else
                     {
-                        newHomeArr[j] = G.HomeTeam.GetAverage(inputStat[j], inUseOffense[j], G.HomeData[inputStat[j]]) / maximumData[inputStat[j]];
-                        newVisitorArr[j] = G.VisitorTeam.GetAverage(inputStat[j], inUseOffense[j], G.VisitorData[inputStat[j]]) / maximumData[inputStat[j]];
+                        int type = inputStat[j];
+                        bool offense = inUseOffense[j];
+                        newHomeArr[j] = G.HomeTeam.GetAverage(type, offense, G) / maximumData[inputStat[j]];
+                        newVisitorArr[j] = G.VisitorTeam.GetAverage(type, offense, G) / maximumData[inputStat[j]];
                     }
                 }
 

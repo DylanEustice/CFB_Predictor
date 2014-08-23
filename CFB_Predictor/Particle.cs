@@ -58,7 +58,7 @@ namespace CFB_Predictor
         //
         // Find fitness of this particle for all training data
         //  - This is the summed squared error
-        public void GetFitness(double[][] inputArray, double[][] outputArray)
+        public double GetFitness(double[][] inputArray, double[][] outputArray)
         {
             double error = 0;   // Initialize error to 0
 
@@ -83,6 +83,8 @@ namespace CFB_Predictor
                 PersonalBest = ParticleFitness;
                 bestNetwork = currNetwork.SetWeights();
             }
+
+            return ParticleFitness;
         }
     }
 }

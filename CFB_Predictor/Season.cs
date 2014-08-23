@@ -108,15 +108,22 @@ namespace CFB_Predictor
             {
                 foreach (Game G in T.Games)
                 {
-                    G.GetYardageRatio();
+                    /*G.GetYardageRatio();
                     G.GetPythagoreanOOC();
                     G.GetPythagoreanExpectation();
-                    G.GetHomeVisitorPyEx();
+                    G.GetHomeVisitorPyEx();*/
                     G.HomeData[Program.BIAS] = 1;
                     G.VisitorData[Program.BIAS] = 1;
                 }
             }
             Games = BuildGames(Teams);
+        }
+        // Manual build for a team's past seasons
+        public Season(int year, Team[] team, Game[] games)
+        {
+            Year = year;
+            Teams = team;
+            Games = games;
         }
 
         //
@@ -156,6 +163,20 @@ namespace CFB_Predictor
                 }
             }
             return GameList.ToArray();
+        }
+
+        //
+        // Adds past seasons to the teams and conferences
+        public void AddPastSeasons(Season[] pastSeasons)
+        {
+            // Add past seasons to each FBS team
+            foreach (Team T in Teams)
+                if (T.Conf.Division == "FBS")
+                    T.GetPastSeasons(pastSeasons);
+
+            // Add past seasons to each conference
+            foreach (Conference C in Conferences)
+                C.GetPastSeasons(pastSeasons);
         }
     }
 }

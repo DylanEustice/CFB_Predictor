@@ -14,6 +14,7 @@ namespace CFB_Predictor
         public Conference Conf;
         public Game[] Games;
         public int[] Record = { 0, 0 };     // [W,L]
+        public List<Season> PastSeasons = new List<Season>();
 
         //
         // Constructor
@@ -26,6 +27,25 @@ namespace CFB_Predictor
             TeamCode = teamCode;
             TeamName = teamName;
             ConfCode = confCode;
+        }
+
+        //
+        // Adds a list of seasons with only this teams game data
+        public void GetPastSeasons(Season[] pastSeasons)
+        {
+            foreach (Season S in pastSeasons)
+            {
+                int pastYear = S.Year;  // set the year
+
+                // Find this team
+                int i = 0;
+                while (S.Teams[i].TeamCode != TeamCode)
+                    i++;
+                Team[] pastTeam = { S.Teams[i] };
+                Game[] pastGames = S.Teams[i].Games;
+                Season pastSeason = new Season(pastYear, pastTeam, pastGames);
+                PastSeasons.Add(pastSeason);
+            }
         }
 
         //
@@ -87,160 +107,178 @@ namespace CFB_Predictor
         }
 
         //
-        // Gets the average of a particular stat
-        public double GetAverage(int stat)
-        {
-            double tot = 0;
-            foreach (Game g in Games)
-                tot += AddStat(g, stat);
-            return tot / Games.Length;
-        }
-        // Option to take out game performance from data
-        public double GetAverage(int stat, double gameStat)
-        {
-            // Check if this is a game stat
-            foreach (int useGame in Program.USE_GAME_STAT)
-                if (useGame == gameStat)
-                    return gameStat;
-
-            // List of stats that are not averaged
-            if (stat == Program.IS_HOME)
-                return gameStat;
-
-            double tot = 0;
-            if (Games.Length > 1)
-            {
-                foreach (Game g in Games)
-                    tot += AddStat(g, stat);
-                return (tot - gameStat) / (Games.Length - 1);
-            }
-            else
-                return AddStat(Games[0], stat);
-        }
-        // Option to get averages from the opposing teams
-        //  - This reverses type of stat (eg. offensive pass yards by this team -> defensive pass yards)
-        public double GetAverage(int stat, bool thisTeam)
-        {
-            double tot = 0;
-            foreach (Game g in Games)
-            {
-                if (thisTeam)
-                    tot += AddStat(g, stat);
-                else
-                    tot += AddOppStat(g, stat);
-            }
-            return tot / Games.Length;
-        }
-        // Option to take out this game performance from data
-        public double GetAverage(int stat, bool thisTeam, double gameStat)
-        {
-            // Check if this is a game stat
-            foreach (int useGame in Program.USE_GAME_STAT)
-                if (useGame == gameStat)
-                    return gameStat;
-
-            // List of stats that are not averaged
-            if (stat == Program.IS_HOME)
-                return gameStat;
-
-            double tot = 0;
-            if (Games.Length > 1)
-            {
-                foreach (Game g in Games)
-                {
-                    if (thisTeam)
-                        tot += AddStat(g, stat);
-                    else
-                        tot += AddOppStat(g, stat);
-                }
-                return (tot - gameStat) / (Games.Length - 1);
-            }
-            else
-            {
-                //Console.WriteLine("WARNING: This is " + TeamName + "'s only game, finding average returns this game.");
-                if (thisTeam)
-                    return AddStat(Games[0], stat);
-                else
-                    return AddOppStat(Games[0], stat);
-            }
-        }
         // Gets the average of either team, using only data from weeks prior
-        public double GetAverage(int stat, bool thisTeam, double gameStat, int date)
+        public double GetAverage(int stat, bool thisTeam, Game game)
         {
-            // Check if this is a game stat
-            foreach (int useGame in Program.USE_GAME_STAT)
-                if (useGame == gameStat)
-                    return gameStat;
+            int date = game.Date;
 
-            // List of stats that are not averaged
+            // Intelligently find averages
             if (stat == Program.IS_HOME)
-                return gameStat;
+            {
+                // Return proper data
+                if (TeamCode == game.HomeCode)
+                    return 1;
+                else
+                    return 0;
+            }
+            else if (stat == Program.OOC_PYTHAG)
+            {
+                int beginLastSeason = PastSeasons[0].Games[0].Date; // First game of previous season
+                int[] dates = { beginLastSeason, date };            // set range of dates
+                game.GetPythagoreanOOC(dates);                      // set pythagorean data
+
+                // Return proper data
+                if (TeamCode == game.HomeCode)
+                    return game.HomeData[Program.OOC_PYTHAG];
+                else
+                    return game.VisitorData[Program.OOC_PYTHAG];
+                
+            }
+            else if (stat == Program.OOC_PYTHAG_RATIO)
+            {
+                // Get home team Py OOC
+                int beginLastSeason = game.HomeTeam.PastSeasons[0].Games[0].Date;   // First game of previous season
+                int[] dates = { beginLastSeason, date };                            // set range of dates
+                double homePyOOC = game.HomeTeam.Conf.GetPythagoreanOOC(dates);
+
+                // Get visitor team Py OOC
+                beginLastSeason = game.VisitorTeam.PastSeasons[0].Games[0].Date;    // First game of previous season
+                dates[0] = beginLastSeason;                                         // set range of dates
+                double visitorPyOOC = game.HomeTeam.Conf.GetPythagoreanOOC(dates);
+
+                // Return proper ratio
+                if (TeamCode == game.HomeCode)
+                    return game.HomeData[Program.OOC_PYTHAG_RATIO];
+                else
+                    return game.VisitorData[Program.OOC_PYTHAG_RATIO];
+            }
+            else if (stat == Program.PYTHAG_EXPECT)
+            {
+                // If there weren't enough games this season, use last season as well
+                int[] dates = new int[2];
+                dates[1] = game.Date;
+                if (Games[1].Date < game.Date)
+                    dates[0] = Games[0].Date;
+                else
+                    dates[0] = PastSeasons[0].Games[0].Date;
+                game.GetPythagoreanExpectation(dates);
+
+                // Return proper data
+                if (TeamCode == game.HomeCode)
+                    return game.HomeData[Program.PYTHAG_EXPECT];
+                else
+                    return game.VisitorData[Program.PYTHAG_EXPECT];
+            }
+            else if (stat == Program.HV_PY_EXPECT || stat == Program.HOME_TIMES_HVPE)
+            {
+                int returnType = stat;
+
+                // If there weren't enough games this season, use last season as well
+                int[] dates = new int[2];
+                dates[1] = game.Date;
+                if (Games[1].Date < game.Date)
+                    dates[0] = Games[0].Date;
+                else
+                    dates[0] = PastSeasons[0].Games[0].Date;
+                game.GetHomeVisitorPyEx(dates);
+
+                // Return proper data
+                if (TeamCode == game.HomeCode)
+                    return game.HomeData[returnType];
+                else
+                    return game.VisitorData[returnType];
+            }
+            else if (stat == Program.YARD_RATIO)
+            {
+                game.GetYardageRatio();
+                if (TeamCode == game.HomeCode)
+                    return game.HomeData[Program.YARD_RATIO];
+                else
+                    return game.VisitorData[Program.YARD_RATIO];
+
+            }
 
             double tot = 0;
-            if (Games.Length > 1)
+
+            // Try to use this season
+            int nGames = 0;
+            foreach (Game G in Games)
             {
-                int nGames = 0;
-                foreach (Game g in Games)
+                // Only add games prior to this one
+                if (G.Date >= date || G.HomeTeam.Conf.Division == "FCS" || G.VisitorTeam.Conf.Division == "FCS")
+                    continue;
+
+                nGames++;
+                if (thisTeam)
+                    tot += AddStat(G, stat);
+                else
+                    tot += AddOppStat(G, stat);
+            }
+            if (nGames > 1)
+            {
+                return tot / nGames;
+            }
+            else    // If there weren't enough games this season, use last season as well
+            {
+                foreach (Game G in PastSeasons[0].Games)
                 {
                     // Only add games prior to this one
-                    if (g.Date >= date || g.HomeTeam.Conf.Division == "FCS" || g.VisitorTeam.Conf.Division == "FCS")
+                    if (G.Date >= date || G.HomeTeam.Conf.Division == "FCS" || G.VisitorTeam.Conf.Division == "FCS")
                         continue;
 
                     nGames++;
                     if (thisTeam)
-                        tot += AddStat(g, stat);
+                        tot += AddStat(G, stat);
                     else
-                        tot += AddOppStat(g, stat);
+                        tot += AddOppStat(G, stat);
                 }
-                return tot / nGames;
-            }
-            else
-            {
-                Console.WriteLine("WARNING: This is " + TeamName + "'s only game, finding average returns this game.");
-                if (thisTeam)
-                    return AddStat(Games[0], stat);
+                if (nGames > 0)
+                    return tot / nGames;
                 else
-                    return AddOppStat(Games[0], stat);
+                {
+                    Console.WriteLine("WARNING: No stats for for this game { Class: Team | Function: GetAverage() }");
+                    Console.WriteLine("         Team: {0}", TeamName);
+                    return Double.NaN;
+                }
             }
         }
 
         //
         // Gets the total from all games but that included
-        public double GetTotal(int stat, double gameStat)
+        public double GetTotal(int stat, bool thisTeam, int[] dates)
         {
+            // Add games to list within date range
             double tot = 0;
-            if (Games.Length > 1)
+            List<Game> allGames = new List<Game>();
+            foreach (Season S in PastSeasons)
             {
-                foreach (Game g in Games)
-                    tot += AddStat(g, stat);
-                return tot - gameStat;
-            }
-            else
-                return AddStat(Games[0], stat);
-        }
-        // Option to get data from opponent
-        public double GetTotal(int stat, bool thisTeam, double gameStat)
-        {
-            double tot = 0;
-            if (Games.Length > 1)
-            {
-                foreach (Game g in Games)
+                foreach (Game G in S.Teams[0].Games)
                 {
-                    if (thisTeam)
-                        tot += AddStat(g, stat);
+                    // Too early or too late
+                    if (G.Date < dates[0] || G.Date >= dates[1])
+                        continue;
                     else
-                        tot += AddOppStat(g, stat);
+                        allGames.Add(G);
                 }
-                return tot - gameStat;
             }
-            else
+            foreach (Game G in Games)
             {
-                //Console.WriteLine("WARNING: This is " + TeamName + "'s only game, finding average returns this game.");
-                if (thisTeam)
-                    return AddStat(Games[0], stat);
+                // Too early or too late
+                if (G.Date < dates[0] || G.Date >= dates[1])
+                    continue;
                 else
-                    return AddOppStat(Games[0], stat);
+                    allGames.Add(G);
             }
+
+            // Find sums
+            foreach (Game G in allGames)
+            {
+                if (thisTeam)
+                    tot += AddStat(G, stat);
+                else
+                    tot += AddOppStat(G, stat);
+            }
+            return tot;
         }
 
         //

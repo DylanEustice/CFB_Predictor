@@ -90,8 +90,8 @@ namespace CFB_Predictor
         public const int YARD_RATIO = 74;
         public const int PASSING_EFF = 75;
         public const int OOC_PYTHAG = 76;               // Use game stat
-        public const int OOC_PYTHANG_RATIO = 77;        // Use game stat
-        public const int PYTHANG_EXPECT = 78;           // Use game stat
+        public const int OOC_PYTHAG_RATIO = 77;        // DISCONTINUED // Use game stat
+        public const int PYTHAG_EXPECT = 78;           // Use game stat
         public const int HV_PY_EXPECT = 79;             // Use game stat
         public const int HOME_TIMES_HVPE = 80;          // Use game stat
         public const int BIAS = 81;                     // Use game stat
@@ -100,8 +100,7 @@ namespace CFB_Predictor
         public const int XTRA_DATA_PTS = 16;
         public const int N_DATA_PTS = 68 + XTRA_DATA_PTS;
 
-        public readonly static int[] USE_GAME_STAT = { CONF, IS_HOME, OOC_PYTHAG, OOC_PYTHANG_RATIO, 
-                                           PYTHANG_EXPECT, HV_PY_EXPECT, HOME_TIMES_HVPE, BIAS };
+        public readonly static int[] USE_GAME_STAT = { CONF, IS_HOME, OOC_PYTHAG, OOC_PYTHAG_RATIO, PYTHAG_EXPECT, HV_PY_EXPECT, HOME_TIMES_HVPE, YARD_RATIO, BIAS };
 
         // Algorithm constants
         public const int HOME = 0;
@@ -134,6 +133,7 @@ namespace CFB_Predictor
             new int[] { 20131203, 20131209 }, //      15 [14]
             new int[] { 20131210, 20131216 }, //      16 [15]
             new int[] { 20131221, 20140106 }, // bowls   [16]
+            new int[] { 20140107, 20140114 }, // end     [17]
         };
     }
 }
